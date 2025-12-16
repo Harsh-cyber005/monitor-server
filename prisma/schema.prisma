@@ -9,3 +9,4 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+// url field is not required for prisma version > 7, and url can be set using environment variable in the prisma.config.js file

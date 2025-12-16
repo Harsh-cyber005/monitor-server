@@ -1,9 +1,8 @@
 import { Router, type Router as ExpressRouter } from "express";
+import { MonitorController } from "../controllers/monitor.controller";
 
 const monitorRouter : ExpressRouter = Router();
 
-monitorRouter.get("/", (_req, res) => {
-    res.send("Monitor Route is working!");
-});
+monitorRouter.get("/", MonitorController.getStatus);
 
 export default monitorRouter;
