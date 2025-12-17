@@ -148,7 +148,7 @@ This is the repository for the Monitor server which is used to expose routes for
             echo "metrics.sh file exists"
     fi
 
-    chmod +x "$METRICS_FILE"
+    sudo chmod +x "$METRICS_FILE"
 
     echo "[setup] metrics.sh is executable"
     echo "[setup] done"
@@ -181,8 +181,9 @@ This is the repository for the Monitor server which is used to expose routes for
     fi
 
     echo "[setup] Installing cron job (interval = $INTERVAL minute(s))"
-    (crontab -l 2>/dev/null | grep -v -F "$METRICS_FILE"; echo "$CRON_LINE") | crontab -
-
+    (crontab -l 2>/dev/null | grep -v -F "$METRICS_FILE" || true
+        echo "$CRON_LINE"
+    ) | crontab -
     echo "[setup] Done installing cron job -> $CRON_LINE"
     ```
 <br>
