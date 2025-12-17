@@ -1,9 +1,8 @@
+import "dotenv/config";
 import express from "express";
-import { configDotenv } from "dotenv";
 
 import monitorRouter from "./routes/monitor.route";
 
-configDotenv({debug: process.env.NODE_ENV === "dev"});
 
 const app = express();
 const PORT = process.env.PORT || 5000;
