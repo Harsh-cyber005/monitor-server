@@ -190,7 +190,7 @@ This is the repository for the Monitor server which is used to expose routes for
     sudo chmod +x setup.sh
     ```
 
-4. Now run the setup.sh using:
+5. Now run the setup.sh using:
     
     ```bash
     ./setup.sh
