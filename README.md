@@ -64,7 +64,6 @@ This is the repository for the Monitor server which is used to expose routes for
 #### Track your VM
 
 1. make a new directory in you machine, /monitor (say)
-<br>
 
 2. make a new file metrics.sh inside this new directory and paste this into it:
     ```bash
@@ -110,7 +109,6 @@ This is the repository for the Monitor server which is used to expose routes for
 
     curl -sS --fail --connect-timeout 3 --max-time 5 -X POST -H "Content-Type: application/json" --data "$JSON" http://localhost:5000/monitor/vm-status > /dev/null
     ```
-<br>
 
 3. make another file named setup.sh inside the same directory and paste this code into it:
 
@@ -186,7 +184,11 @@ This is the repository for the Monitor server which is used to expose routes for
     ) | crontab -
     echo "[setup] Done installing cron job -> $CRON_LINE"
     ```
-<br>
+
+4. give executable permission to setup.sh:
+    ```bash
+    sudo chmod +x setup.sh
+    ```
 
 4. Now run the setup.sh using:
     
