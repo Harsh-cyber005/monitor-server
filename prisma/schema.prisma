@@ -16,8 +16,7 @@ datasource db {
 // url field is not required for prisma version > 7, and url can be set using environment variable in the prisma.config.js file
 
 model VM {
-  id          Int      @id @default(autoincrement())
-  vmId        String
+  vmId        String   @id
   ramUsedMB   Int
   ramTotalMB  Int
   cpuUsedPct  Float
@@ -32,7 +31,8 @@ model VM {
 }
 
 model Metric {
-  vmId        String   @id
+  id          Int      @id @default(autoincrement())
+  vmId        String
   status      Status
   ramUsedMB   Int
   ramTotalMB  Int
