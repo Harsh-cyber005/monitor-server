@@ -18,7 +18,6 @@ datasource db {
 model VM {
   id          Int      @id @default(autoincrement())
   vmId        String
-  status      Status
   ramUsedMB   Int
   ramTotalMB  Int
   cpuUsedPct  Float
@@ -29,6 +28,21 @@ model VM {
   publicIp    String
 
   @@unique([vmId, timestamp])
+  @@index([vmId, timestamp])
+}
+
+model Metric {
+  vmId        String   @id
+  status      Status
+  ramUsedMB   Int
+  ramTotalMB  Int
+  cpuUsedPct  Float
+  diskUsedMB  Int
+  diskTotalMB Int
+  timestamp   DateTime @default(now())
+  hostname    String
+  publicIp    String
+
   @@index([vmId, timestamp])
 }
 

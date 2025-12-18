@@ -44,7 +44,7 @@ export class MonitorController {
         res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
     }
 
-    static async postVMStatus(req: Request, res: Response): Promise<void> {
+    static async postMetric(req: Request, res: Response): Promise<void> {
         try {
             const parsedData = postVMStatusSchema.safeParse(req.body);
             if (!parsedData.success) {
@@ -52,7 +52,7 @@ export class MonitorController {
                 return;
             }
             const data: postVMStatusPayload = parsedData.data;
-            await prisma.vM.create({
+            await prisma.metric.create({
                 data: {
                     vmId: data.vmId,
                     status: data.status,
@@ -73,7 +73,7 @@ export class MonitorController {
         }
     }
 
-    static async getVMStatuses(_req: Request, res: Response): Promise<void> {
+    static async getVMMetrics(_req: Request, res: Response): Promise<void> {
         try {
             const parsedQuery = getVMStatusesQuerySchema.safeParse(_req.body);
             if (!parsedQuery.success) {
