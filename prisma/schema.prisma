@@ -25,7 +25,8 @@ model VM {
   timestamp   DateTime @default(now())
   hostname    String
   publicIp    String
-
+  status      Status
+  
   @@unique([vmId, timestamp])
   @@index([vmId, timestamp])
 }

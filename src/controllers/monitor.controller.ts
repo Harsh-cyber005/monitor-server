@@ -66,6 +66,32 @@ export class MonitorController {
                     publicIp: data.publicIp
                 }
             });
+            await prisma.vM.upsert({
+                where: { vmId: data.vmId },
+                update: {
+                    status: data.status,
+                    hostname: data.hostname,
+                    publicIp: data.publicIp,
+                    timestamp: new Date(data.timestamp),
+                    ramUsedMB: data.ramUsedMB,
+                    ramTotalMB: data.ramTotalMB,
+                    diskUsedMB: data.diskUsedMB,
+                    diskTotalMB: data.diskTotalMB,
+                    cpuUsedPct: data.cpuUsed
+                },
+                create: {
+                    vmId: data.vmId,
+                    status: data.status,
+                    hostname: data.hostname,
+                    publicIp: data.publicIp,
+                    timestamp: new Date(data.timestamp),
+                    ramUsedMB: data.ramUsedMB,
+                    ramTotalMB: data.ramTotalMB,
+                    diskUsedMB: data.diskUsedMB,
+                    diskTotalMB: data.diskTotalMB,
+                    cpuUsedPct: data.cpuUsed
+                }
+            });
             res.status(201).json({ message: "VM status recorded successfully" });
         } catch (error) {
             res.status(500).json({ error: "Internal server error", details: error });
