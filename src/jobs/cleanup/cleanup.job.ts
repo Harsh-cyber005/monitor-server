@@ -1,8 +1,8 @@
 import "dotenv/config";
-import { prisma } from "../db/prisma";
+import { prisma } from "../../db/prisma";
 
 const cleanupOldRecords = async () => {
-    const ttlInDays = 7;
+    const ttlInDays = 0;
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - ttlInDays);
     try {
