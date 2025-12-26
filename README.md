@@ -68,56 +68,10 @@ This is the repository for the Monitor server which is used to expose routes for
 2. make a new file metrics.sh inside this new directory and paste this into it:
     ```bash
     #!/bin/bash
-
     set -euo pipefail
 
+    SCRIPT_DIR="/var/lib/vm-monitor/scripts"
     VM_ID_FILE="/var/lib/vm-monitor/vm-id"
-
-    if [ ! -s "$VM_ID_FILE" ]; then
-            echo "ERROR: VM ID file missing or empty at $VM_ID_FILE" >&2
-            exit 1
-    fi
-
-    VM_ID=$(cat "$VM_ID_FILE")
-
-    CPU_USED=$(top -bn1 | awk -F',' '/Cpu/ {print $4}' | awk '{print 100-$1}')
-
-    read RAM_TOTAL RAM_USED <<< $(free -m | awk '/Mem:/ {print $2, $3}')
-
-    read DISK_TOTAL DISK_USED <<< $(df -m --output=size,used / | tail -1)
-
-    TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-    HOSTNAME=$(hostname -I | awk '{print $1}')
-
-    IP=$(curl -s -4 https://icanhazip.com | tr -d '\n')
-
-    JSON=$(printf '{\n'
-    printf '\t"vmId":"%s",\n' "$VM_ID"
-    printf '\t"status":"%s",\n' "running"
-    printf '\t"timestamp":"%s",\n' "$TS"
-    printf '\t"ramUsedMB":%d,\n' "$RAM_USED"
-    printf '\t"ramTotalMB":%d,\n' "$RAM_TOTAL"
-    printf '\t"diskUsedMB":%d,\n' "$DISK_USED"
-    printf '\t"diskTotalMB":%d,\n' "$DISK_TOTAL"
-    printf '\t"cpuUsed":%.2f,\n' "$CPU_USED"
-    printf '\t"hostname":"%s",\n' "$HOSTNAME"
-    printf '\t"publicIp":"%s"\n' "$IP"
-    printf '}\n')
-
-    echo ${JSON}
-
-    curl -sS --fail --connect-timeout 3 --max-time 5 -X POST -H "Content-Type: application/json" --data "$JSON" http://localhost:5000/monitor/vm-status > /dev/null
-    ```
-
-3. make another file named setup.sh inside the same directory and paste this code into it:
-
-    ```bash
-    #!/bin/bash
-    set -euo pipefail
-
-    VM_ID_FILE="/var/lib/vm-monitor/vm-id"
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
     METRICS_FILE=$SCRIPT_DIR/metrics.sh
     EMETRICS_FILE=$SCRIPT_DIR/emetrics.err
@@ -128,7 +82,7 @@ This is the repository for the Monitor server which is used to expose routes for
     # ensure vm-id file exists and has the uuid
     if [[ ! -s "$VM_ID_FILE" ]]; then
             sudo mkdir -p /var/lib/vm-monitor
-            sudo chmod 755 /var/lib/vm-monitor
+                    sudo chmod 755 /var/lib/vm-monitor
             uuidgen | sudo tee "$VM_ID_FILE" > /dev/null
             sudo chmod 644 "$VM_ID_FILE"
             echo "[setup] Creating VM ID"
@@ -138,15 +92,27 @@ This is the repository for the Monitor server which is used to expose routes for
             cat "$VM_ID_FILE"
     fi
 
-    # ensure metrics.sh file exists and is executable
-    if [[ ! -f "$METRICS_FILE" ]]; then
-            echo "ERROR: metrics.sh file not found at $METRICS_FILE" >&2
-            exit 1
-    else
-            echo "metrics.sh file exists"
+    if [[ ! -d "$SCRIPT_DIR" ]]; then
+            sudo mkdir -p "$SCRIPT_DIR"
+            sudo chmod 755 "$SCRIPT_DIR"
     fi
 
-    sudo chmod +x "$METRICS_FILE"
+    if [[ ! -d "$SCRIPT_DIR" ]]; then
+            echo "[setup] Failed to create script directory: $SCRIPT_DIR" >&2
+            exit 1
+    fi
+
+    # ensure metrics.sh file exists and is executable
+    sudo curl --progress-bar \
+    https://gist.githubusercontent.com/Harsh-cyber005/1b3131d0bdddd37968cf81270eecef46/raw/bd2b00b1e1cf2b192acd843f25419c33d5d3a50b/metrics-dummy.sh \
+    -o "$METRICS_FILE"
+
+    sudo chmod 755 "$METRICS_FILE"
+
+    CRON_USER="$(id -un)"
+    sudo touch "$EMETRICS_FILE"
+    sudo chown "$CRON_USER:$CRON_USER" "$EMETRICS_FILE"
+    sudo chmod 644 "$EMETRICS_FILE"
 
     echo "[setup] metrics.sh is executable"
     echo "[setup] done"
@@ -179,18 +145,17 @@ This is the repository for the Monitor server which is used to expose routes for
     fi
 
     echo "[setup] Installing cron job (interval = $INTERVAL minute(s))"
-    (crontab -l 2>/dev/null | grep -v -F "$METRICS_FILE" || true
-        echo "$CRON_LINE"
-    ) | crontab -
+    (crontab -l 2>/dev/null | grep -v -F "$METRICS_FILE"; echo "$CRON_LINE") | crontab -
+
     echo "[setup] Done installing cron job -> $CRON_LINE"
     ```
 
-4. give executable permission to setup.sh:
+3. give executable permission to setup.sh:
     ```bash
     sudo chmod +x setup.sh
     ```
 
-5. Now run the setup.sh using:
+4. Now run the setup.sh using:
     
     ```bash
     ./setup.sh
