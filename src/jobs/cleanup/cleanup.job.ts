@@ -16,11 +16,11 @@ const prisma = new PrismaClient({
 });
 
 const cleanupOldRecords = async () => {
-    const ttlInDays = 0;
+    const ttlInDays = 7;
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - ttlInDays);
     try {
-        const deletedRecords = await prisma.vM.deleteMany({
+        const deletedRecords = await prisma.metric.deleteMany({
             where: {
                 timestamp: {
                     lt: cutoffDate
