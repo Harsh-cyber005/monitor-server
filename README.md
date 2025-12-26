@@ -70,6 +70,11 @@ This is the repository for the Monitor server which is used to expose routes for
     #!/bin/bash
     set -euo pipefail
 
+    if [[ "$(id -u)" -eq 0 ]]; then
+    echo "ERROR: Do not run this script with sudo" >&2
+    exit 1
+    fi
+
     SCRIPT_DIR="/var/lib/vm-monitor/scripts"
     VM_ID_FILE="/var/lib/vm-monitor/vm-id"
 
@@ -82,7 +87,7 @@ This is the repository for the Monitor server which is used to expose routes for
     # ensure vm-id file exists and has the uuid
     if [[ ! -s "$VM_ID_FILE" ]]; then
             sudo mkdir -p /var/lib/vm-monitor
-                    sudo chmod 755 /var/lib/vm-monitor
+            sudo chmod 755 /var/lib/vm-monitor
             uuidgen | sudo tee "$VM_ID_FILE" > /dev/null
             sudo chmod 644 "$VM_ID_FILE"
             echo "[setup] Creating VM ID"
@@ -97,26 +102,21 @@ This is the repository for the Monitor server which is used to expose routes for
             sudo chmod 755 "$SCRIPT_DIR"
     fi
 
-    if [[ ! -d "$SCRIPT_DIR" ]]; then
-            echo "[setup] Failed to create script directory: $SCRIPT_DIR" >&2
-            exit 1
-    fi
-
     # ensure metrics.sh file exists and is executable
-    sudo curl --progress-bar \
+    # fetch metrics.sh safely
+    curl --progress-bar \
     https://gist.githubusercontent.com/Harsh-cyber005/1b3131d0bdddd37968cf81270eecef46/raw/bd2b00b1e1cf2b192acd843f25419c33d5d3a50b/metrics-dummy.sh \
-    -o "$METRICS_FILE"
-
-    sudo chmod 755 "$METRICS_FILE"
+    | sudo tee "$METRICS_FILE" > /dev/null
 
     CRON_USER="$(id -un)"
+    sudo chown "$CRON_USER:$CRON_USER" "$METRICS_FILE"
+    sudo chmod 755 "$METRICS_FILE"
+    echo "[setup] metrics.sh is present and executable"
+
     sudo touch "$EMETRICS_FILE"
     sudo chown "$CRON_USER:$CRON_USER" "$EMETRICS_FILE"
     sudo chmod 644 "$EMETRICS_FILE"
-
-    echo "[setup] metrics.sh is executable"
-    echo "[setup] done"
-
+    echo "[setup] emetrics.err is present"
 
     # setting up the cron
     read -rp "Run metrics every how many minutes? (1–60, default 1): " INTERVAL
@@ -145,7 +145,11 @@ This is the repository for the Monitor server which is used to expose routes for
     fi
 
     echo "[setup] Installing cron job (interval = $INTERVAL minute(s))"
-    (crontab -l 2>/dev/null | grep -v -F "$METRICS_FILE"; echo "$CRON_LINE") | crontab -
+
+    (
+    crontab -l 2>/dev/null | grep -v -F "$METRICS_FILE" || true
+    echo "$CRON_LINE"
+    ) | crontab -
 
     echo "[setup] Done installing cron job -> $CRON_LINE"
     ```
