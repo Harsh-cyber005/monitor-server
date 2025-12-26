@@ -26,6 +26,7 @@ model VM {
   hostname    String
   publicIp    String
   status      Status
+  metrics     Metric[]
   
   @@unique([vmId, timestamp])
   @@index([vmId, timestamp])
@@ -34,6 +35,7 @@ model VM {
 model Metric {
   id          Int      @id @default(autoincrement())
   vmId        String
+  vm          VM       @relation(fields: [vmId], references: [vmId], onDelete: Cascade)
   status      Status
   ramUsedMB   Int
   ramTotalMB  Int
