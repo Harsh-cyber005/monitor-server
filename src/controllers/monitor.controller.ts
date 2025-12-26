@@ -52,20 +52,6 @@ export class MonitorController {
                 return;
             }
             const data: postVMStatusPayload = parsedData.data;
-            await prisma.metric.create({
-                data: {
-                    vmId: data.vmId,
-                    status: data.status,
-                    timestamp: new Date(data.timestamp),
-                    ramUsedMB: data.ramUsedMB,
-                    ramTotalMB: data.ramTotalMB,
-                    diskUsedMB: data.diskUsedMB,
-                    diskTotalMB: data.diskTotalMB,
-                    cpuUsedPct: data.cpuUsed,
-                    hostname: data.hostname,
-                    publicIp: data.publicIp
-                }
-            });
             await prisma.vM.upsert({
                 where: { vmId: data.vmId },
                 update: {
@@ -90,6 +76,20 @@ export class MonitorController {
                     diskUsedMB: data.diskUsedMB,
                     diskTotalMB: data.diskTotalMB,
                     cpuUsedPct: data.cpuUsed
+                }
+            });
+            await prisma.metric.create({
+                data: {
+                    vmId: data.vmId,
+                    status: data.status,
+                    timestamp: new Date(data.timestamp),
+                    ramUsedMB: data.ramUsedMB,
+                    ramTotalMB: data.ramTotalMB,
+                    diskUsedMB: data.diskUsedMB,
+                    diskTotalMB: data.diskTotalMB,
+                    cpuUsedPct: data.cpuUsed,
+                    hostname: data.hostname,
+                    publicIp: data.publicIp
                 }
             });
             res.status(201).json({ message: "VM status recorded successfully" });
