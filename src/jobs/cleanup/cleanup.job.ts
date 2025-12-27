@@ -19,7 +19,10 @@ const cleanupOldRecords = async () => {
     const ttlInDays = 7;
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - ttlInDays);
+    const establishmentCutoffDate = new Date();
+    establishmentCutoffDate.setDate(establishmentCutoffDate.getDate() - 1);
     try {
+        console.log("Starting cleanup of old records on:", new Date().toISOString());
         const deletedRecords = await prisma.metric.deleteMany({
             where: {
                 timestamp: {
@@ -27,11 +30,23 @@ const cleanupOldRecords = async () => {
                 }
             }
         });
-        await prisma.$executeRawUnsafe("VACUUM");
-        await prisma.$disconnect();
         console.log(`Deleted ${deletedRecords.count} old records.`);
+        const deletedAuths = await prisma.vM.deleteMany({
+            where: {
+                auth: {
+                    isEstablished: false,
+                    createdAt: {
+                        lt: establishmentCutoffDate
+                    }
+                }
+            }
+        });
+        console.log(`Deleted ${deletedAuths.count} stale VM auth records.`);
+        await prisma.$executeRawUnsafe("VACUUM");
     } catch (error) {
         console.error("Error during cleanup of old records:", error);
+    } finally {
+        await prisma.$disconnect();
     }
 }
 
