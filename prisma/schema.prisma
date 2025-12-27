@@ -17,6 +17,7 @@ datasource db {
 
 model VM {
   vmId        String   @id
+  vmName      String
   ramUsedMB   Int
   ramTotalMB  Int
   cpuUsedPct  Float
@@ -27,8 +28,8 @@ model VM {
   publicIp    String
   status      Status
   metrics     Metric[]
-  
-  @@unique([vmId, timestamp])
+  auth        VMAuth?
+
   @@index([vmId, timestamp])
 }
 
@@ -47,6 +48,16 @@ model Metric {
   publicIp    String
 
   @@index([vmId, timestamp])
+}
+
+model VMAuth {
+  vmId          String   @id
+  vm            VM       @relation(fields: [vmId], references: [vmId], onDelete: Cascade)
+  vmName        String
+  secretHash    String
+  createdAt     DateTime @default(now())
+  establishedAt DateTime?
+  isEstablished Boolean  @default(false)
 }
 
 enum Status {

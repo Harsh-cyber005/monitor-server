@@ -23,7 +23,21 @@ export class VMController {
                     }
                 }
             });
-            const vms = await prisma.vM.findMany();
+            const vms = await prisma.vM.findMany({
+                select: {
+                    vmId: true,
+                    vmName: true,
+                    ramUsedMB: true,
+                    ramTotalMB: true,
+                    cpuUsedPct: true,
+                    status: true,
+                    diskUsedMB: true,
+                    diskTotalMB: true,
+                    hostname: true,
+                    publicIp: true,
+                    timestamp: true
+                }
+            });
             res.status(200).json(vms);
         } catch (error) {
             res.status(500).json({ error: "Internal server error", details: error });
@@ -39,7 +53,20 @@ export class VMController {
             }
             const data: VMDetailsPayload = parsedData.data;
             const vm = await prisma.vM.findUnique({
-                where: { vmId: data.vmId }
+                where: { vmId: data.vmId },
+                select: {
+                    vmId: true,
+                    vmName: true,
+                    ramUsedMB: true,
+                    ramTotalMB: true,
+                    cpuUsedPct: true,
+                    status: true,
+                    diskUsedMB: true,
+                    diskTotalMB: true,
+                    hostname: true,
+                    publicIp: true,
+                    timestamp: true
+                }
             });
             if (!vm) {
                 res.status(404).json({ error: "VM not found" });
