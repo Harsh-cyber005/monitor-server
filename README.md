@@ -76,7 +76,7 @@ This is the repository for the Monitor server which is used to expose routes for
     fi
 
     echo "[setup] Requesting sudo access..."
-    sudo -v
+    sudo ls
 
     CRON_USER="$(id -un)"
     SCRIPT_DIR="/var/lib/vm-monitor/scripts"
