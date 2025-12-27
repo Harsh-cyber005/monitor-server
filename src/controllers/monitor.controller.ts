@@ -67,6 +67,7 @@ export class MonitorController {
                 },
                 create: {
                     vmId: data.vmId,
+                    vmName: data.hostname,
                     status: data.status,
                     hostname: data.hostname,
                     publicIp: data.publicIp,
