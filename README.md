@@ -75,8 +75,13 @@ This is the repository for the Monitor server which is used to expose routes for
     exit 1
     fi
 
+    echo "[setup] Requesting sudo access..."
+    sudo -v
+
+    CRON_USER="$(id -un)"
     SCRIPT_DIR="/var/lib/vm-monitor/scripts"
     VM_ID_FILE="/var/lib/vm-monitor/vm-id"
+    VM_SECRET_FILE="/var/lib/vm-monitor/vm-secret"
 
     METRICS_FILE=$SCRIPT_DIR/metrics.sh
     EMETRICS_FILE=$SCRIPT_DIR/emetrics.err
@@ -86,15 +91,38 @@ This is the repository for the Monitor server which is used to expose routes for
 
     # ensure vm-id file exists and has the uuid
     if [[ ! -s "$VM_ID_FILE" ]]; then
+            echo "[setup] VM ID not found."
+            read -rp "Enter VM ID (issued by server): " INPUT_VM_ID
+            if [[ -z "$INPUT_VM_ID" ]]; then
+                    echo "ERROR: VM ID cannot be empty" >&2
+                    exit 1
+            fi
             sudo mkdir -p /var/lib/vm-monitor
             sudo chmod 755 /var/lib/vm-monitor
-            uuidgen | sudo tee "$VM_ID_FILE" > /dev/null
+            printf "%s\n" "$INPUT_VM_ID" | sudo tee "$VM_ID_FILE" > /dev/null
             sudo chmod 644 "$VM_ID_FILE"
             echo "[setup] Creating VM ID"
             cat "$VM_ID_FILE"
     else
             echo "[setup] VM ID already exists"
             cat "$VM_ID_FILE"
+    fi
+
+    if [[ ! -s "$VM_SECRET_FILE" ]]; then
+            echo "[setup] VM secret not found."
+            read -rsp "Enter VM secret (issued by server): " INPUT_VM_SECRET
+            echo
+            if [[ -z "$INPUT_VM_SECRET" ]]; then
+                    echo "ERROR: VM secret cannot be empty" >&2
+                    exit 1
+            fi
+            printf "%s\n" "$INPUT_VM_SECRET" | sudo tee "$VM_SECRET_FILE" > /dev/null
+            sudo chown "$CRON_USER:$CRON_USER" "$VM_SECRET_FILE"
+            sudo chmod 600 "$VM_SECRET_FILE"
+
+            echo "[setup] VM secret created"
+    else
+            echo "[setup] VM secret already exists"
     fi
 
     if [[ ! -d "$SCRIPT_DIR" ]]; then
@@ -105,10 +133,9 @@ This is the repository for the Monitor server which is used to expose routes for
     # ensure metrics.sh file exists and is executable
     # fetch metrics.sh safely
     curl --progress-bar \
-    https://gist.githubusercontent.com/Harsh-cyber005/1b3131d0bdddd37968cf81270eecef46/raw/bd2b00b1e1cf2b192acd843f25419c33d5d3a50b/metrics-dummy.sh \
+    https://gist.githubusercontent.com/Harsh-cyber005/1b3131d0bdddd37968cf81270eecef46/raw/1c81084eee5631b2440a6a4144a04e7263e02005/metrics-dummy.sh \
     | sudo tee "$METRICS_FILE" > /dev/null
 
-    CRON_USER="$(id -un)"
     sudo chown "$CRON_USER:$CRON_USER" "$METRICS_FILE"
     sudo chmod 755 "$METRICS_FILE"
     echo "[setup] metrics.sh is present and executable"

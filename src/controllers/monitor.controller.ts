@@ -5,6 +5,7 @@ import z from "zod";
 export interface postVMStatusPayload {
     vmId: string;
     status: "running" | "stopped" | "error";
+    signature: string;
     timestamp: string;
     ramUsedMB: number;
     ramTotalMB: number;
@@ -15,9 +16,10 @@ export interface postVMStatusPayload {
     publicIp: string;
 };
 
-const postVMStatusSchema = z.object({
+export const postVMStatusSchema = z.object({
     vmId: z.string().nonempty(),
     status: z.enum(["running", "stopped", "error"]),
+    signature: z.string().nonempty(),
     timestamp: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format" }),
     ramUsedMB: z.number().nonnegative(),
     ramTotalMB: z.number().positive(),
@@ -52,22 +54,19 @@ export class MonitorController {
                 return;
             }
             const data: postVMStatusPayload = parsedData.data;
-            await prisma.vM.upsert({
-                where: { vmId: data.vmId },
-                update: {
-                    status: data.status,
-                    hostname: data.hostname,
-                    publicIp: data.publicIp,
-                    timestamp: new Date(data.timestamp),
-                    ramUsedMB: data.ramUsedMB,
-                    ramTotalMB: data.ramTotalMB,
-                    diskUsedMB: data.diskUsedMB,
-                    diskTotalMB: data.diskTotalMB,
-                    cpuUsedPct: data.cpuUsed
-                },
-                create: {
+            await prisma.vMAuth.updateMany({
+                where: {
                     vmId: data.vmId,
-                    vmName: data.hostname,
+                    isEstablished: false
+                },
+                data: {
+                    isEstablished: true,
+                    establishedAt: new Date()
+                }
+            })
+            await prisma.vM.update({
+                where: { vmId: data.vmId },
+                data: {
                     status: data.status,
                     hostname: data.hostname,
                     publicIp: data.publicIp,
