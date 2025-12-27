@@ -47,7 +47,7 @@ This is the repository for the Monitor server which is used to expose routes for
 
 8. now migrate the prisma schema into the new dev.db database using:
     ```bash
-    pnpm exec prisma migrate dev --name init
+    pnpm exec prisma migrate deploy
     ```
 
 9. generate the prisma client

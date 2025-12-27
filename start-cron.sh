@@ -3,6 +3,7 @@
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLEANUP_JS_FILE_PATH="$CURRENT_DIR/dist/jobs/cleanup/cleanup.job.js"
 CLEANUP_ERROR_LOG_PATH="$CURRENT_DIR/logs/cleanup_error.log"
+CLEANUP_CONSOLE_LOG_PATH="$CURRENT_DIR/logs/cleanup_console.log"
 
 if [[ ! -f "$CLEANUP_JS_FILE_PATH" ]]; then
   echo "Error: Cleanup job file not found at $CLEANUP_JS_FILE_PATH"
@@ -17,6 +18,10 @@ if [[ ! -f "$CLEANUP_ERROR_LOG_PATH" ]]; then
   touch "$CLEANUP_ERROR_LOG_PATH"
 fi
 
+if [[ ! -f "$CLEANUP_CONSOLE_LOG_PATH" ]]; then
+  touch "$CLEANUP_CONSOLE_LOG_PATH"
+fi
+
 # running the cleanup job every day at midnight
 INTERVAL_DAY=1
 
@@ -28,7 +33,7 @@ fi
 
 NODE_PATH=$(which node)
 
-CRON_CMD="$NODE_PATH $CLEANUP_JS_FILE_PATH 2>> $CLEANUP_ERROR_LOG_PATH"
+CRON_CMD="$NODE_PATH $CLEANUP_JS_FILE_PATH 2>> $CLEANUP_ERROR_LOG_PATH 1>>$CLEANUP_CONSOLE_LOG_PATH"
 CRON_LINE="$CRON_SCHEDULE $CRON_CMD"
 
 echo "[setup] $CRON_LINE"
