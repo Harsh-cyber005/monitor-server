@@ -29,6 +29,6 @@ jobs:
             git pull origin master
             pnpm install
             pnpm exec prisma migrate deploy
+            pnpm exec prisma generate
             pm2 restart mns
           EOF
-          
