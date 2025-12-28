@@ -42,6 +42,21 @@ const cleanupOldRecords = async () => {
             }
         });
         console.log(`Deleted ${deletedAuths.count} stale VM auth records.`);
+        const unusedTokens = await prisma.token.deleteMany({
+            where: {
+                isUsed: false,
+                expiresAt: {
+                    lt: new Date()
+                }
+            }
+        });
+        console.log(`Deleted ${unusedTokens.count} unused expired tokens.`);
+        const usedTokens = await prisma.token.deleteMany({
+            where: {
+                isUsed: true
+            }
+        });
+        console.log(`Deleted ${usedTokens.count} used tokens.`);
         await prisma.$executeRawUnsafe("VACUUM");
     } catch (error) {
         console.error("Error during cleanup of old records:", error);

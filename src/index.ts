@@ -3,6 +3,7 @@ import express from "express";
 
 import monitorRouter from "./routes/monitor.route";
 import vmRouter from "./routes/vm.route";
+import agentRouter from "./routes/agent.route";
 
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use("/monitor", monitorRouter);
 app.use("/vm", vmRouter);
+app.use("/agent", agentRouter);
 
 app.get("/", (_req, res) => {
     res.send("Hello, World!");

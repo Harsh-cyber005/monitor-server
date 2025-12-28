@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../db/prisma";
 import z from "zod";
 import crypto from "crypto";
+import { v4 as uuidv4 } from "uuid";
 
 const getVMDetailsSchema = z.object({
     vmId: z.string(),
@@ -97,6 +98,13 @@ export class VMController {
             const vmId = crypto.randomUUID();
             const vmSecret = crypto.randomBytes(32).toString("hex");
             const secretHash = vmSecret;
+            const existingVM = await prisma.vM.findUnique({
+                where: { vmName: data.vmName }
+            });
+            if (existingVM) {
+                res.status(400).json({ error: "VM with the same name already exists" });
+                return;
+            }
             await prisma.vM.create({
                 data: {
                     vmId,
@@ -120,9 +128,21 @@ export class VMController {
                     isEstablished: false,
                 }
             });
+            const token = uuidv4();
+            await prisma.token.create({
+                data: {
+                    token:token,
+                    vmId: vmId,
+                    createdAt: new Date(),
+                    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+                }
+            });
+            const url = process.env.NODE_ENV === "prod" ? process.env.PROD_URL : process.env.DEV_URL;
+            const setupLink = `${url}/agent/setup.sh?token=${token}`;
+            const command = `curl -fsSL ${setupLink} | bash`;
             res.status(201).json({
-                vmId,
-                vmSecret
+                setupLink: setupLink,
+                command: command
             });
         } catch (error) {
             res.status(500).json({ error: "Internal server error", details: error });
