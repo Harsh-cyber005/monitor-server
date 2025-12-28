@@ -10,6 +10,8 @@ This is the repository for the Monitor server which is used to expose routes for
 - pnpm (as the package manager)
 - prisma (as the ORM)
 
+#### Deployed on: [Monitor Server](http://15.206.87.39/)
+
 #### Steps to start this Project on your machine
 
 1. clone the repo into your machine
