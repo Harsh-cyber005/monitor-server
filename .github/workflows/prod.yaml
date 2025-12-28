@@ -15,7 +15,7 @@ jobs:
           
       - name: Upload .env using Heredoc
         run: |
-          ssh -i ~/harshmax.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.ASSH_SERVER_IP }} 'cat > /home/ubuntu/monitor-server/.env' << EOF
+          ssh -i ~/harshmax.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.ASSH_SERVER_IP }} 'cat > /home/ubuntu/code/monitor-server/.env' << EOF
           ${{ secrets.ENV }}
           EOF
 
@@ -25,7 +25,7 @@ jobs:
             export NVM_DIR="\$HOME/.nvm"
             [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
             export PATH=\$PATH:/home/ubuntu/.npm-global/bin
-            cd /home/ubuntu/monitor-server
+            cd /home/ubuntu/code/monitor-server
             git pull origin master
             pnpm install
             pnpm exec prisma migrate deploy
