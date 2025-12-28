@@ -31,4 +31,5 @@ jobs:
             pnpm exec prisma migrate deploy
             pnpm exec prisma generate
             pm2 restart mns
+            pm2 restart mnp
           EOF
