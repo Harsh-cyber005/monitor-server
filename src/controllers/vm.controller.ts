@@ -114,7 +114,7 @@ export class VMController {
                     cpuUsedPct: 0,
                     diskUsedMB: 0,
                     diskTotalMB: 0,
-                    status: "stopped",
+                    status: "unknown",
                     hostname: "",
                     publicIp: "",
                     timestamp: new Date(0)

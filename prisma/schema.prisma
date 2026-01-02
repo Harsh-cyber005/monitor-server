@@ -74,5 +74,5 @@ model Token {
 enum Status {
   running
   stopped
-  error
+  unknown
 }

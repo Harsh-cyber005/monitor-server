@@ -4,7 +4,7 @@ import z from "zod";
 
 export interface postVMStatusPayload {
     vmId: string;
-    status: "running" | "stopped" | "error";
+    status: "running" | "stopped" | "unknown";
     signature: string;
     timestamp: string;
     ramUsedMB: number;
@@ -18,7 +18,7 @@ export interface postVMStatusPayload {
 
 export const postVMStatusSchema = z.object({
     vmId: z.string().nonempty(),
-    status: z.enum(["running", "stopped", "error"]),
+    status: z.enum(["running", "stopped", "unknown"]),
     signature: z.string().nonempty(),
     timestamp: z.string().refine((date) => !isNaN(Date.parse(date)), { message: "Invalid date format" }),
     ramUsedMB: z.number().nonnegative(),
