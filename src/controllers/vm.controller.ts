@@ -30,7 +30,8 @@ export class VMController {
                 where: {
                     timestamp: {
                         lt: new Date(Date.now() - 3 * 60 * 1000) // 3 minutes ago
-                    }
+                    },
+                    status: "running"
                 }
             });
             const vms = await prisma.vM.findMany({
