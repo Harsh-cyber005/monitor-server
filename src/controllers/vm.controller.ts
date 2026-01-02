@@ -6,10 +6,12 @@ import { v4 as uuidv4 } from "uuid";
 
 const getVMDetailsSchema = z.object({
     vmId: z.string(),
+    limit: z.number().optional(),
 });
 
 export interface VMDetailsPayload {
     vmId: string;
+    limit?: number;
 }
 
 const createVMSchema = z.object({
@@ -79,6 +81,14 @@ export class VMController {
                     timestamp: true
                 }
             });
+            const metrics = await prisma.metric.findMany({
+                where: { vmId: data.vmId },
+                orderBy: { timestamp: "desc" },
+                take: data.limit || 50
+            });
+            if (vm) {
+                (vm as any).metrics = metrics;
+            }
             if (!vm) {
                 res.status(404).json({ error: "VM not found" });
                 return;
