@@ -4,5 +4,6 @@ import { AgentController } from "../controllers/agent.controller";
 const agentRouter: ExpressRouter = Router();
 
 agentRouter.get("/setup.sh", AgentController.getSetupScript);
+agentRouter.get("/t", AgentController.getTokenStatus);
 
 export default agentRouter;

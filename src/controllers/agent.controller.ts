@@ -44,4 +44,33 @@ export class AgentController {
         res.setHeader("Content-Type", "text/x-shellscript");
         res.status(200).send(setupScript);
     }
+    static async getTokenStatus(req: Request, res: Response): Promise<void> {
+        try {
+            const token = req.query.token;
+            if (typeof token !== "string" || token.trim() === "") {
+                res.status(400).send(-3);
+                return;
+            }
+            const installToken = await prisma.token.findUnique({
+                where: { token: token }
+            });
+            if (!installToken) {
+                res.status(400).send(-1);
+                return;
+            }
+            if (installToken.expiresAt < new Date()) {
+                res.status(400).send(-2);
+                return;
+            }
+            if (installToken.isUsed) {
+                res.status(200).send(1);
+                return;
+            }
+            res.status(200).send(0);
+            return;
+        } catch (error) {
+            res.status(500).json({ error: "Internal server error", details: error });
+            return;
+        }
+    }
 };
