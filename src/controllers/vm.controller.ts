@@ -142,7 +142,8 @@ export class VMController {
             const command = `curl -fsSL ${setupLink} | bash`;
             res.status(201).json({
                 setupLink: setupLink,
-                command: command
+                command: command,
+                pollingLink: `${url}/agent/t?token=${token}`,
             });
         } catch (error) {
             res.status(500).json({ error: "Internal server error", details: error });
