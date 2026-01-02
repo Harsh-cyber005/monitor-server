@@ -63,7 +63,7 @@ fi
 # ensure metrics.sh file exists and is executable
 # fetch metrics.sh safely
 curl --progress-bar \
-  https://gist.githubusercontent.com/Harsh-cyber005/0c0aee8ec78002e2f2fb4fb157ab6e29/raw/cf7458e039e1a32d5c3d3ad303f2b2612ea2e45f/metrics.sh \
+  https://gist.githubusercontent.com/Harsh-cyber005/0c0aee8ec78002e2f2fb4fb157ab6e29/raw/f3349cea051a877b21ec23aaa7aaf05e1f329fde/metrics.sh \
 | sudo tee "$METRICS_FILE" > /dev/null
 
 sudo chown "$CRON_USER:$CRON_USER" "$METRICS_FILE"
