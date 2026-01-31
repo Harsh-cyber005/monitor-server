@@ -1,6 +1,39 @@
-version: "3.92"
+version: "3.9"
 
 services:
+  db:
+    image: postgres:15-alpine
+    container_name: monitor-db
+    restart: always
+    environment:
+      POSTGRES_USER: monitor_user
+      POSTGRES_PASSWORD: monitor_password
+      POSTGRES_DB: monitor_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    expose:
+      - "5000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+
+  prisma-studio:
+    build: ./backend
+    command: pnpm exec prisma studio --port 51212 --browser none
+    ports:
+      - "51212:51212"
+    environment:
+      - PRISMA_STUDIO_HOST=0.0.0.0
+      - DATABASE_URL=postgresql://monitor_user:monitor_password@db:5432/monitor_db?schema=public
+    depends_on:
+      - db
+
   nginx:
     image: nginx:alpine
     ports:
@@ -11,16 +44,10 @@ services:
       - frontend
       - backend
 
-  backend:
-    build: ./backend
-    expose:
-      - "5000"
-    env_file:
-      - ./backend/.env
-    volumes:
-      - ./backend/dev.db:/app/dev.db
-
   frontend:
     build: ./frontend
     expose:
       - "3000"
+
+volumes:
+  pgdata:

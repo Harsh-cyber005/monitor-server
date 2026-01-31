@@ -54,6 +54,7 @@ export class VMController {
             res.status(200).json(vms);
         } catch (error) {
             res.status(500).json({ error: "Internal server error", details: error });
+            console.log(error);
             return;
         }
     }
