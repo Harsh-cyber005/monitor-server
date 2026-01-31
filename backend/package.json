@@ -9,7 +9,7 @@
     "check": "tsc --noEmit",
     "build": "tsc",
     "start": "pnpm run start-cron && node dist/index.js",
-    "start-cron": "pnpm run build && ./start-cron.sh"
+    "start-cron": "pnpm run build && bash /app/start-cron.sh"
   },
   "keywords": [],
   "author": "",

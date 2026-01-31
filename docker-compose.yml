@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
+
+  backend:
+    build: ./backend
+    expose:
+      - "5000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/dev.db:/app/dev.db
+
+  frontend:
+    build: ./frontend
+    expose:
+      - "3000"
