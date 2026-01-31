@@ -1,19 +1,16 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client-js"
-  // output   = "../src/generated/prisma" 
-  // optional output field, use this to specify a custom output directory
-  // by default, the client is generated in node_modules/@prisma/client
-  // and can be imported from there as import { PrismaClient } from '@prisma/client'
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
-
-// url field is not required for prisma version > 7, and url can be set using environment variable in the prisma.config.js file
 
 model VM {
   vmId        String   @id
