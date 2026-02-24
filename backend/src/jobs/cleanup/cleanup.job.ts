@@ -19,7 +19,7 @@ if (!connectionString) {
 const adapter = new PrismaPg({ connectionString })
 const prisma = new PrismaClient({ adapter });
 
-const cleanupOldRecords = async () => {
+export const cleanupOldRecords = async () => {
     const ttlInDays = 7;
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - ttlInDays);
@@ -61,12 +61,9 @@ const cleanupOldRecords = async () => {
             }
         });
         console.log(`Deleted ${usedTokens.count} used tokens.`);
-        await prisma.$executeRawUnsafe("VACUUM");
     } catch (error) {
         console.error("Error during cleanup of old records:", error);
     } finally {
         await prisma.$disconnect();
     }
 }
-
-cleanupOldRecords();

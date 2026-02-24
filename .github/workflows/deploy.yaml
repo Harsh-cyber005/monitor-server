@@ -1,0 +1,57 @@
+name: Build and Deploy
+on:
+  push:
+    branches: ["master"]
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/monitor-server:backend
+      - name: Build Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/monitor-server:frontend
+          build-args: |
+            NEXT_PUBLIC_API_URL=/api
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.RSSH_SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.ORACLE_PEM }}
+          script: |
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            
+            mkdir -p /home/ubuntu/code/monitor-server && cd /home/ubuntu/code/monitor-server
+
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
+
+            git pull origin master
+            
+            echo "${{ secrets.ENV }}" > backend/.env
+            
+            docker compose pull
+            
+            docker compose up -d
+        
+            docker image prune -f

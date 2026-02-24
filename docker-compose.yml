@@ -13,29 +13,41 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U monitor_user -d monitor_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
-    build: ./backend
+    image: zelinksi/monitor-server:backend
+    container_name: monitor-server-backend
+    restart: always
     expose:
       - "5000"
     env_file:
       - ./backend/.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   prisma-studio:
-    build: ./backend
-    command: pnpm exec prisma studio --port 51212 --browser none
+    image: zelinksi/monitor-server:backend
+    container_name: monitor-server-prisma-studio
+    restart: always
+    command: pnpm exec prisma studio --port 51212 --browser none --host 0.0.0.0
     ports:
-      - "51212:51212"
-    environment:
-      - PRISMA_STUDIO_HOST=0.0.0.0
-      - DATABASE_URL=postgresql://monitor_user:monitor_password@db:5432/monitor_db?schema=public
+      - "127.0.0.1:51212:51212"
+    env_file:
+      - ./backend/.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   nginx:
     image: nginx:alpine
+    container_name: monitor-server-nginx
+    restart: always
     ports:
       - "80:80"
     volumes:
@@ -45,9 +57,13 @@ services:
       - backend
 
   frontend:
-    build: ./frontend
+    image: zelinksi/monitor-server:frontend
+    container_name: monitor-server-frontend
+    restart: always
     expose:
       - "3000"
+    depends_on:
+      - backend
 
 volumes:
   pgdata:

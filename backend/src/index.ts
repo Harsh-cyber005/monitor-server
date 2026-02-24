@@ -1,10 +1,12 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import cron from "node-cron";
 
 import monitorRouter from "./routes/monitor.route";
 import vmRouter from "./routes/vm.route";
 import agentRouter from "./routes/agent.route";
+import { cleanupOldRecords } from "./jobs/cleanup/cleanup.job";
 
 
 const app = express();
@@ -22,6 +24,11 @@ app.use("/agent", agentRouter);
 
 app.get("/", (_req, res) => {
     res.send("Hello, World!");
+});
+
+cron.schedule('0 0 * * *', async () => {
+    console.log("[CRON] Running Midnight Database Cleanup...");
+    await cleanupOldRecords();
 });
 
 app.listen(PORT, "0.0.0.0", () => {
