@@ -43,7 +43,7 @@ jobs:
             mkdir -p /home/ubuntu/code/monitor-server && cd /home/ubuntu/code/monitor-server
 
             if [ ! -d ".git" ]; then
-              git clone git@github.com/${{ github.repository }}.git .
+              git clone git@github.com:${{ github.repository }}.git .
             fi
 
             git pull origin master
