@@ -35,7 +35,7 @@ services:
     image: zelinksi/monitor-server:backend
     container_name: monitor-server-prisma-studio
     restart: always
-    command: pnpm exec prisma studio --port 51212 --browser none --host 0.0.0.0
+    command: pnpm exec prisma studio --port 51212 --browser none
     ports:
       - "127.0.0.1:51212:51212"
     env_file:
