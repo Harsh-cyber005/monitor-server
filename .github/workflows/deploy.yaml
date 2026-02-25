@@ -48,9 +48,9 @@ jobs:
 
             git pull origin master
             
-            echo "${{ secrets.ENV }}" > backend/.env
+            echo '${{ secrets.ENV }}' > backend/.env
 
-            echo "${{ secrets.SETUP_SCRIPT }}" > backend/scripts/setup-agent.sh
+            echo '${{ secrets.SETUP_SCRIPT }}' > backend/scripts/setup-agent.sh
             
             docker compose pull
             
