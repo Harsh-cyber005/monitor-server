@@ -54,6 +54,8 @@ jobs:
             
             docker compose pull
             
-            docker compose up -d
+            docker compose up -d --remove-orphans
+
+            docker compose restart nginx
         
             docker image prune -f

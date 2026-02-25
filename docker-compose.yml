@@ -27,6 +27,8 @@ services:
       - "5000"
     env_file:
       - ./backend/.env
+    volumes:
+      - ./backend/scripts/setup-agent.sh:/app/scripts/setup-agent.sh:ro
     depends_on:
       db:
         condition: service_healthy
